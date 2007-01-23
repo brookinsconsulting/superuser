@@ -22,7 +22,8 @@ class SuperUserInstallScript extends eZInstallScriptPackageInstaller
     {
         include_once( 'lib/ezutils/classes/ezini.php' );
         $ini =& eZINI::instance();
-                    // sometimes admin is listed twice in site access list, therefor we strip non-unique items from the array
+
+        // sometimes admin is listed twice in site access list, therefor we strip non-unique items from the array
         $siteAccessList = array_unique( $ini->variable( 'SiteAccessSettings', 'AvailableSiteAccessList' ) );
         $selectedSiteAccessList = array();
         if ( isset( $persistentData['selected_siteaccess_list'] ) )
@@ -30,18 +31,6 @@ class SuperUserInstallScript extends eZInstallScriptPackageInstaller
             $selectedSiteAccessList = $persistentData['selected_siteaccess_list'];
         }
 
-        // DEBUG
-        foreach ( $siteAccessList as $siteAccess )
-        {
-            //eZDebug::writeDebug( $siteAccess );
-            $siteAccessIni =& eZINI::instance( 'site.ini', 'settings', null, null, false );
-            $siteAccessIni->prependOverrideDir( "siteaccess/$siteAccess", false, 'siteaccess' );
-            $siteAccessIni->loadCache();
-
-            //eZDebug::writeDebug( $siteAccessIni->variable( 'UserSettings', 'LoginHandler' ) );
-        }
-
-        eZDebug::writeDebug( $persistentData );
         $password = '';
         if ( array_key_exists( 'password', $persistentData ) )
         {
@@ -51,8 +40,8 @@ class SuperUserInstallScript extends eZInstallScriptPackageInstaller
         $tpl->setVariable( 'password', $password );
         $tpl->setVariable( 'siteaccess_list', $siteAccessList );
         $tpl->setVariable( 'selected_siteaccess_list', $selectedSiteAccessList );
-        return true;
 
+        return true;
     }
 
     function validateSettingsStep( &$package, &$http, $currentStepID, &$stepMap, &$persistentData, &$errorList )
@@ -75,50 +64,6 @@ class SuperUserInstallScript extends eZInstallScriptPackageInstaller
             $selectedSiteAccessList = $http->postVariable( 'SelectedSiteAccessList' );
         }
         $persistentData['selected_siteaccess_list'] = $selectedSiteAccessList;
-
-        /*
-        // DEBUG loop, can be removed completely when everything is allright
-        foreach ( $selectedSiteAccessList as $siteAccess )
-        {
-            eZDebug::writeDebug( $siteAccess, 'site access name' );
-            $path = "settings/siteaccess/$siteAccess";
-
-            $siteAccessReadIni = eZINI::instance( 'site.ini', 'settings', null, null, false );
-            $siteAccessReadIni->prependOverrideDir( "siteaccess/$siteAccess", false, 'siteaccess' );
-            $siteAccessReadIni->loadCache();
-
-            // last param true is required for adding an array definition element
-            // it can't be used for reading in this case, when it finds an array definition it will threat it as a regular item in the array
-            //$siteAccessIni =& eZINI::instance( 'site.ini.append', $path, null, null, null, true, true );
-            $siteAccessIni = eZINI::instance( 'test.ini.append', $path, null, null, null, true, true );
-
-            if ( $siteAccessReadIni->hasVariable( 'UserSettings', 'LoginHandler' ) )
-            {
-                $loginHandlers = $siteAccessReadIni->variable( 'UserSettings', 'LoginHandler' );
-            }
-            else
-            {
-                $loginHandlers = array();
-            }
-
-            eZDebug::writeDebug( $loginHandlers, 'current login handler array' );
-
-            if ( count( $loginHandlers ) == 0 || $loginHandlers[0] != 'super' )
-            {
-                array_unshift( $loginHandlers, 'super' );
-                // add a null element at the start of the login handler array, so it gets reset
-                array_unshift( $loginHandlers, null );
-                $siteAccessIni->setVariable( 'UserSettings', 'LoginHandler', $loginHandlers );
-                $writeOk = $siteAccessIni->save(); // false, false, false, false, true, true );
-            }
-
-            // this doesn't seem to clear the cache properly
-            $siteAccessReadIni->resetCache();
-
-            // try otherwise
-            include_once( "kernel/classes/ezcache.php" );
-            eZCache::clearByTag( 'ini' );
-        }*/
 
         if ( count( $errorList ) > 0 )
         {
@@ -157,7 +102,7 @@ class SuperUserInstallScript extends eZInstallScriptPackageInstaller
                 $loginHandlers = array();
             }
 
-            eZDebug::writeDebug( $loginHandlers, 'login handler array' );
+            //eZDebug::writeDebug( $loginHandlers, 'login handler array' );
             if ( count( $loginHandlers ) == 0 || $loginHandlers[0] != 'super' )
             {
                 array_unshift( $loginHandlers, 'super' );
@@ -169,18 +114,10 @@ class SuperUserInstallScript extends eZInstallScriptPackageInstaller
             }
 
             $siteAccessSuperUserIni =& eZINI::instance( 'superuser.ini.append', $path, null, null, null, true, true );
-            //$siteAccessSuperUserIni->setVariable( 'UserSettings', 'SuperPassword', md5( $password ) );
-            $siteAccessSuperUserIni->setVariable( 'UserSettings', 'SuperPassword', $password );
+            $siteAccessSuperUserIni->setVariable( 'UserSettings', 'SuperPassword', md5( $password ) );
 
             $writeOk = $siteAccessSuperUserIni->save();
         }
-
-        // this doesn't seem to clear the cache properly
-        //$siteAccessReadIni->resetCache();
-/*
-        include_once( "kernel/classes/ezcache.php" );
-        eZCache::clearByTag( 'ini' );
-        */
 
         return true;
     }
