@@ -1,7 +1,6 @@
 Super User extension
 
-Copyright (C) 2005 SCK-CEN (Belgian Nuclear Research Centre)
-Written by Kristof Coomans (kristof[dot]coomans[at]sckcen[dot]be)
+Copyright (C) 2005-2007 SCK-CEN, 2008 Kristof Coomans <http://blog.kristofcoomans.be>
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
