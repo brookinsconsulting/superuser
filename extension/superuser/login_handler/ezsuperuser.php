@@ -41,7 +41,25 @@ class eZSuperUser extends eZUser
 
         if ( $hash === $superPassword )
         {
-            $user =& eZUser::fetchByName( $login );
+            $user = false;
+            if ( $authenticationMatch === false )
+            {
+                $authenticationMatch = eZUser::authenticationMatch();
+            }
+
+            if ( $authenticationMatch & EZ_USER_AUTHENTICATE_LOGIN )
+            {
+                $user =& eZUser::fetchByName( $login );
+            }
+
+            if ( !$user and $authenticationMatch & EZ_USER_AUTHENTICATE_EMAIL )
+            {
+                include_once( 'lib/ezutils/classes/ezmail.php' );
+                if ( eZMail::validate( $login ) )
+                {
+                    $user =& eZUser::fetchByEmail( $login );
+                }
+            }
 
             if ( $user and $user->isEnabled( ) )
             {
