@@ -2,7 +2,7 @@
 
 class SuperUserInstallScript extends eZInstallScriptPackageInstaller
 {
-    function SuperUserInstallScript( &$package, $type, $installItem )
+    function SuperUserInstallScript( $package, $type, $installItem )
     {
         $steps = array();
         $steps[] = array( 'id' => 'SuperUser_settings',
@@ -18,10 +18,9 @@ class SuperUserInstallScript extends eZInstallScriptPackageInstaller
                                              $steps );
     }
 
-    function initializeSettingsStep( &$package, &$http, $step, &$persistentData, &$tpl, &$module )
+    function initializeSettingsStep( $package, $http, $step, &$persistentData, $tpl, $module )
     {
-        include_once( 'lib/ezutils/classes/ezini.php' );
-        $ini =& eZINI::instance();
+        $ini = eZINI::instance();
 
         // sometimes admin is listed twice in site access list, therefor we strip non-unique items from the array
         $siteAccessList = array_unique( $ini->variable( 'SiteAccessSettings', 'AvailableSiteAccessList' ) );
@@ -44,7 +43,7 @@ class SuperUserInstallScript extends eZInstallScriptPackageInstaller
         return true;
     }
 
-    function validateSettingsStep( &$package, &$http, $currentStepID, &$stepMap, &$persistentData, &$errorList )
+    function validateSettingsStep( $package, $http, $currentStepID, $stepMap, &$persistentData, &$errorList )
     {
         $password = '';
         if ( $http->hasPostVariable( 'Password' ) )
@@ -75,7 +74,7 @@ class SuperUserInstallScript extends eZInstallScriptPackageInstaller
     }
 
 
-    function commitSettingsStep( &$package, &$http, $step, &$persistentData, &$tpl )
+    function commitSettingsStep( $package, $http, $step, &$persistentData, $tpl )
     {
         $selectedSiteAccessList = $persistentData['selected_siteaccess_list'];
         $password = $persistentData['password'];
@@ -85,13 +84,13 @@ class SuperUserInstallScript extends eZInstallScriptPackageInstaller
             eZDebug::writeDebug( $siteAccess, 'site access name' );
             $path = "settings/siteaccess/$siteAccess";
 
-            $siteAccessReadIni =& eZINI::instance( 'site.ini', 'settings', null, null, false );
+            $siteAccessReadIni = eZINI::instance( 'site.ini', 'settings', null, null, false );
             $siteAccessReadIni->prependOverrideDir( "siteaccess/$siteAccess", false, 'siteaccess' );
             $siteAccessReadIni->loadCache();
 
             // last param true is required for adding an array definition element
             // it can't be used for reading, when it finds an array definition it will threat it as a regular item in the array
-            $siteAccessIni =& eZINI::instance( 'site.ini.append', $path, null, null, null, true, true );
+            $siteAccessIni = eZINI::instance( 'site.ini.append', $path, null, null, null, true, true );
 
             if ( $siteAccessReadIni->hasVariable( 'UserSettings', 'LoginHandler' ) )
             {
@@ -113,7 +112,7 @@ class SuperUserInstallScript extends eZInstallScriptPackageInstaller
                 eZDebug::writeDebug( $writeOk, 'write ok' );
             }
 
-            $siteAccessSuperUserIni =& eZINI::instance( 'superuser.ini.append', $path, null, null, null, true, true );
+            $siteAccessSuperUserIni = eZINI::instance( 'superuser.ini.append', $path, null, null, null, true, true );
             $siteAccessSuperUserIni->setVariable( 'UserSettings', 'SuperPassword', md5( $password ) );
 
             $writeOk = $siteAccessSuperUserIni->save();
